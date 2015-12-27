@@ -49,14 +49,14 @@ algorithm of Anthony Dekker to Python (See the NeuQuant class for its
 license).
 
 Many thanks to Alex Robinson for implementing the concept of subrectangles,
-which (depening on image content) can give a very significant reduction in
+which (depending on image content) can give a very significant reduction in
 file size.
 
 This code is based on gifmaker (in the scripts folder of the source 
 distribution of PIL)
 
 
-Usefull links
+Useful links
 -------------
   * http://tronche.com/computer-graphics/gif/
   * http://en.wikipedia.org/wiki/Graphics_Interchange_Format
@@ -136,7 +136,7 @@ def checkImages(images):
 
 def intToBin(i):
     """ Integer to two bytes """
-    # devide in two parts (bytes)
+    # divide in two parts (bytes)
     i1 = i % 256
     i2 = int( i/256)
     # make string (little endian)
@@ -172,11 +172,11 @@ class GifWriter:
         palette. Still a maximum of 256 color per frame, obviously.
         
         Written by Ant1 on 2010-08-22
-        Modified by Alex Robinson in Janurari 2011 to implement subrectangles.
+        Modified by Alex Robinson in Janurary 2011 to implement subrectangles.
         
         """
         
-        # Defaule use full image and place at upper left
+        # Default use full image and place at upper left
         if xy is None:
             xy  = (0,0)
         
@@ -200,19 +200,16 @@ class GifWriter:
     def getAppExt(self, loops=float('inf')):
         """ getAppExt(loops=float('inf'))
         
-        Application extention. This part specifies the amount of loops.
-        If loops is 0 or inf, it goes on infinitely.
+        Application extension. This part specifies the amount of loops.
+        If loops is -1 or inf, it goes on infinitely.
         
         """
         
-        if loops==0 or loops==float('inf'):
+        if loops == -1 or loops==float('inf'):
             loops = 2**16-1
-            #bb = "" # application extension should not be used
-                    # (the extension interprets zero loops
-                    # to mean an infinite number of loops)
-                    # Mmm, does not seem to work
-        if True:
-            bb = b"\x21\xFF\x0B"  # application extension
+        bb = b""
+        if loops != 0: #omit the extension if we would like a nonlooping gif
+            bb += b"\x21\xFF\x0B"  # application extension
             bb += b"NETSCAPE2.0"
             bb += b"\x03\x01"
             bb += intToBin(loops)
@@ -256,8 +253,14 @@ class GifWriter:
         user, the values are checked. Otherwise the subrectangles are
         calculated automatically.
         
-        """ 
-        image_info = [im.flags for im in images ]
+        """
+
+        image_info = []
+
+        for im in images:
+            if hasattr(im, 'flags'):
+                image_info.append(im.flags)
+
         if isinstance(subRectangles, (tuple,list)):
             # xy given directly
             
@@ -359,7 +362,7 @@ class GifWriter:
         """ convertImagesToPIL(images, nq=0)
         
         Convert images to Paletted PIL images, which can then be 
-        written to a single animaged GIF.
+        written to a single animated GIF.
         
         """
         
@@ -551,9 +554,9 @@ def writeGif(filename, images, duration=0.1, repeat=True, dither=False,
     
     # Check loops
     if repeat is False:
-        loops = 1
+        loops = 0
     elif repeat is True:
-        loops = 0 # zero means infinite
+        loops = -1 # -1 means infinite
     else:
         loops = int(repeat)
     
@@ -653,7 +656,7 @@ class NeuQuant:
     samplefac should be an integer number of 1 or higher, 1 
     being the highest quality, but the slowest performance. 
     With avalue of 10, one tenth of all pixels are used during 
-    training. This value seems a nice tradeof between speed
+    training. This value seems a nice tradeoff between speed
     and quality.
     
     colors is the amount of colors to reduce the image to. This
