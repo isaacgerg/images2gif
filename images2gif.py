@@ -201,14 +201,14 @@ class GifWriter:
         """ getAppExt(loops=float('inf'))
         
         Application extension. This part specifies the amount of loops.
-        If loops is -1 or inf, it goes on infinitely.
+        If loops is 0 or inf, it goes on infinitely.
         
         """
         
-        if loops == -1 or loops==float('inf'):
+        if loops == 0 or loops==float('inf'):
             loops = 2**16-1
         bb = b""
-        if loops != 0: #omit the extension if we would like a nonlooping gif
+        if loops != 1: #omit the extension if we would like a nonlooping gif
             bb += b"\x21\xFF\x0B"  # application extension
             bb += b"NETSCAPE2.0"
             bb += b"\x03\x01"
@@ -516,7 +516,8 @@ def writeGif(filename, images, duration=0.1, repeat=True, dither=False,
     duration : scalar or list of scalars
         The duration for all frames, or (if a list) for each frame.
     repeat : bool or integer
-        The amount of loops. If True, loops infinitetely.
+        The amount of loops. If True or 0, loops infinitely. If False or
+        1, will play once then stop. If some other int N, loops N times.
     dither : bool
         Whether to apply dithering
     nq : integer
@@ -554,9 +555,9 @@ def writeGif(filename, images, duration=0.1, repeat=True, dither=False,
     
     # Check loops
     if repeat is False:
-        loops = 0
+        loops = 1
     elif repeat is True:
-        loops = -1 # -1 means infinite
+        loops = 0 # 0 means infinite
     else:
         loops = int(repeat)
     
